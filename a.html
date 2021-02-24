@@ -1,0 +1,62 @@
+<html>
+
+<head>
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="./leaflet/leaflet.css" />
+    <script src="./leaflet/leaflet.js"> </script>
+    <style>
+
+    </style>
+</head>
+<body>
+<div id="mapid" style="width: 50%; height: 60%"></div>
+
+<h3>当前位置：</h3>
+<p>经度:<span id="iss-lng"></span> | 纬度:<span id="iss-lat"></span></p>
+<script>
+
+    var myMap = L.map('mapid');
+    myMap.setView([0, 0], 4);
+    L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+        attribution: '',
+        tileSize: 512,
+        maxZoom: 18,
+        zoomOffset: -1,
+        id: 'mapbox/streets-v11',
+        accessToken: 'pk.eyJ1Ijoic25vd2Rhc2QiLCJhIjoiY2s5OG1oa2ExMTdkdDNpbDIyaThvaHhlNiJ9.Btn4tHuw6V7AIJuwbIqeKA'
+    }).addTo(myMap);
+
+    var lat = 0;
+    var lon = 0;
+    var marker;
+    function moveISS () {
+        if(marker){
+            myMap.removeLayer(marker)
+        }
+
+        $.getJSON('http://api.open-notify.org/iss-now.json?callback=?', function(data) {
+            lat = data['iss_position']['latitude'];
+            lon = data['iss_position']['longitude'];
+            console.log(data['iss_position'])
+        });
+
+        const myIcon = L.icon({
+            iconUrl: 'ISSIcon.png',
+            iconSize: [60, 30]
+        });
+
+        $("#iss-lng").html(lon);
+        $("#iss-lat").html(lat);
+
+        myMap.panTo([lat, lon], animate=true);
+        marker = L.marker([lat, lon], {icon: myIcon, alt: 'this is iss'}).addTo(myMap);
+
+        setTimeout(moveISS, 5000);
+    }
+
+    moveISS()
+</script>
+
+</body>
+
+</html>
